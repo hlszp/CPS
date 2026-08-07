@@ -1,0 +1,31 @@
+# ===== 依赖 =====
+node_modules/
+server/node_modules/
+
+# ===== 数据库（生产数据，不入库） =====
+server/data/*.db
+server/data/*.db-shm
+server/data/*.db-wal
+!server/data/.gitkeep
+
+# ===== 下载的临时资料（体积大，非源码） =====
+downloads/
+
+# ===== 第三方平台调研脚本（含凭证逻辑，非门户运行代码） =====
+scripts/
+
+# ===== 日志 =====
+*.log
+logs/
+
+# ===== 环境变量 / 密钥 =====
+.env
+.env.*
+!.env.example
+
+# ===== 系统 / 编辑器 =====
+.DS_Store
+*.swp
+Thumbs.db
+.idea/
+.vscode/

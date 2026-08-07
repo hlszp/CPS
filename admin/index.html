@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CPS 三级考试平台 · 内容管理后台</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<!-- 登录页 -->
+<div id="loginPage" class="login-page">
+  <div class="login-card">
+    <div class="login-logo">🧠</div>
+    <h1>CPS 三级考试平台</h1>
+    <p class="login-subtitle">内容管理后台</p>
+    <form id="loginForm">
+      <input type="email" id="loginEmail" placeholder="邮箱" value="admin@cps.edu" required>
+      <input type="password" id="loginPassword" placeholder="密码" required>
+      <button type="submit">登 录</button>
+    </form>
+    <p id="loginError" class="login-error"></p>
+  </div>
+</div>
+
+<!-- 管理后台主界面 -->
+<div id="adminApp" class="admin-app" style="display:none">
+  <!-- 侧边栏 -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-logo">🧠</span>
+      <span class="sidebar-title">CPS 管理后台</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" data-tab="dashboard" class="nav-item active">📊 仪表盘</a>
+      <a href="#" data-tab="courses" class="nav-item">📚 课程管理</a>
+      <a href="#" data-tab="questions" class="nav-item">📝 题库管理</a>
+      <a href="#" data-tab="practice" class="nav-item">🃏 练习卡管理</a>
+      <a href="#" data-tab="knowledge" class="nav-item">🕸️ 知识图谱</a>
+      <a href="#" data-tab="news" class="nav-item">📰 资讯管理</a>
+      <a href="#" data-tab="pending" class="nav-item">🤖 待审核 <span id="pendingBadge" class="nav-badge" style="display:none"></span></a>
+      <a href="#" data-tab="agents" class="nav-item">⚙️ 智能体</a>
+      <a href="#" data-tab="users" class="nav-item">👤 用户管理</a>
+      <a href="#" data-tab="settings" class="nav-item">⚙️ 系统设置</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <span id="adminName">管理员</span>
+        <span id="adminEmail" class="user-email"></span>
+      </div>
+      <button id="openPortalBtn" class="btn-portal" onclick="openPortalHome()">🌐 打开门户首页</button>
+      <button id="logoutBtn" class="btn-logout">退出</button>
+    </div>
+    <div style="padding:8px 20px;text-align:center;font-size:11px;color:rgba(255,255,255,0.3)">
+      &copy; 2026 ZhangYi. All Rights Reserved.
+    </div>
+  </aside>
+
+  <!-- 主内容区 -->
+  <main class="main-content">
+    <!-- 仪表盘 -->
+    <div id="tab-dashboard" class="tab-content active">
+      <h2>仪表盘</h2>
+      <div class="stats-grid" id="dashboardStats">
+        <div class="stat-card"><div class="stat-icon">📚</div><div class="stat-value" id="statCourses">-</div><div class="stat-label">课程</div></div>
+        <div class="stat-card"><div class="stat-icon">📝</div><div class="stat-value" id="statQuestions">-</div><div class="stat-label">题库</div></div>
+        <div class="stat-card"><div class="stat-icon">🃏</div><div class="stat-value" id="statPractice">-</div><div class="stat-label">练习题</div></div>
+        <div class="stat-card"><div class="stat-icon">🕸️</div><div class="stat-value" id="statNodes">-</div><div class="stat-label">知识节点</div></div>
+        <div class="stat-card"><div class="stat-icon">📰</div><div class="stat-value" id="statNews">-</div><div class="stat-label">资讯</div></div>
+        <div class="stat-card"><div class="stat-icon">👤</div><div class="stat-value" id="statUsers">-</div><div class="stat-label">用户</div></div>
+      </div>
+      <div class="dashboard-section">
+        <h3>快捷操作</h3>
+        <div class="quick-actions">
+          <button class="quick-btn" onclick="switchTab('questions')">➕ 添加题目</button>
+          <button class="quick-btn" onclick="switchTab('news')">➕ 发布资讯</button>
+          <button class="quick-btn" onclick="switchTab('courses')">✏️ 编辑课程</button>
+          <button class="quick-btn" onclick="openPortalHome()">🌐 打开门户首页</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 课程管理 -->
+    <div id="tab-courses" class="tab-content">
+      <h2>课程管理</h2>
+      <div class="toolbar">
+        <select id="courseTypeFilter">
+          <option value="">全部课程</option>
+          <option value="theory">理论课</option>
+          <option value="practice">实务课</option>
+        </select>
+        <button class="btn-primary" onclick="openCourseEditor()">➕ 新建课程</button>
+      </div>
+      <div id="courseList" class="content-list"></div>
+    </div>
+
+    <!-- 题库管理 -->
+    <div id="tab-questions" class="tab-content">
+      <h2>题库管理</h2>
+      <div class="toolbar">
+        <select id="qCategoryFilter">
+          <option value="">全部分类</option>
+          <option value="theory_single">理论·单选题</option>
+          <option value="theory_multiple">理论·多选题</option>
+          <option value="theory_judge">理论·判断题</option>
+          <option value="practice_single">实务·单选题</option>
+          <option value="practice_multiple">实务·多选题</option>
+          <option value="practice_case">实务·案例题</option>
+        </select>
+        <input type="text" id="qSearch" placeholder="搜索题目..." style="flex:1;max-width:300px">
+        <button class="btn-primary" onclick="openQuestionEditor()">➕ 添加题目</button>
+      </div>
+      <div class="stats-bar" id="qStats"></div>
+      <div id="questionList" class="content-list"></div>
+    </div>
+
+    <!-- 练习卡管理 -->
+    <div id="tab-practice" class="tab-content">
+      <h2>练习卡管理</h2>
+      <div class="toolbar">
+        <button class="btn-primary" onclick="openTopicEditor()">➕ 新建主题</button>
+      </div>
+      <div id="practiceList" class="content-list"></div>
+    </div>
+
+    <!-- 知识图谱 -->
+    <div id="tab-knowledge" class="tab-content">
+      <h2>知识图谱</h2>
+      <div class="toolbar">
+        <span id="kgInfo" class="info-text"></span>
+        <button class="btn-primary" onclick="exportKnowledge()">⬇️ 导出 JSON</button>
+      </div>
+      <div class="kg-editor">
+        <textarea id="kgEditor" placeholder="知识图谱 JSON 数据..." style="width:100%;min-height:500px;font-family:monospace;font-size:13px;padding:12px;border:1px solid #ddd;border-radius:8px"></textarea>
+        <button class="btn-primary" onclick="saveKnowledge()" style="margin-top:12px">💾 保存知识图谱</button>
+      </div>
+    </div>
+
+    <!-- 资讯管理 -->
+    <div id="tab-news" class="tab-content">
+      <h2>资讯管理</h2>
+      <div class="toolbar">
+        <select id="newsCategoryFilter">
+          <option value="">全部分类</option>
+          <option value="exam">考试动态</option>
+          <option value="career">职业展望</option>
+          <option value="research">学术研究</option>
+          <option value="resource">权威资源</option>
+        </select>
+        <button class="btn-primary" onclick="openNewsEditor()">➕ 发布资讯</button>
+      </div>
+      <div class="batch-bar" id="newsBatchBar" style="display:none">
+        <label class="batch-select-all"><input type="checkbox" id="newsSelectAll" onchange="toggleNewsSelectAll(this.checked)"> 全选</label>
+        <span class="batch-count">已选 <b id="newsSelectedCount">0</b> 条</span>
+        <span class="batch-actions">
+          <select id="newsBatchCategory">
+            <option value="exam">改分类：考试动态</option>
+            <option value="career">改分类：职业展望</option>
+            <option value="research">改分类：学术研究</option>
+            <option value="resource">改分类：权威资源</option>
+          </select>
+          <button class="btn-edit" id="btnNewsBatchCat" onclick="batchUpdateNewsCategory()">应用分类</button>
+          <button class="btn-ai" id="btnNewsReclassify" onclick="aiReclassifyNews()">🤖 AI 智能重分类</button>
+        </span>
+      </div>
+      <div id="newsList" class="content-list"></div>
+    </div>
+
+    <!-- 待审核 -->
+    <div id="tab-pending" class="tab-content">
+      <h2>AI 待审核内容</h2>
+      <div class="toolbar">
+        <select id="pendingStatusFilter">
+          <option value="pending">待审核</option>
+          <option value="published">已发布</option>
+          <option value="rejected">已拒绝</option>
+          <option value="">全部</option>
+        </select>
+        <select id="pendingTypeFilter">
+          <option value="">全部类型</option>
+          <option value="news">新闻采集</option>
+          <option value="question">模拟出题</option>
+          <option value="knowledge">知识图谱</option>
+        </select>
+        <div class="confidence-filter">
+          <label class="confidence-filter-label">最小置信度</label>
+          <input type="range" id="confidenceSlider" min="0" max="100" value="0" step="5" class="confidence-slider">
+          <span id="confidenceValue" class="confidence-value">0%</span>
+          <button class="btn-secondary btn-sm" id="confidenceClearBtn" onclick="clearConfidenceFilter()">清除</button>
+        </div>
+        <span id="pendingStats" class="info-text"></span>
+      </div>
+
+      <!-- 批量操作栏 -->
+      <div class="batch-bar" id="batchBar">
+        <div class="batch-bar-left">
+          <label class="batch-select-all">
+            <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this.checked)">
+            <span>全选</span>
+          </label>
+          <span class="batch-count">已选 <strong id="selectedCount">0</strong> 项</span>
+        </div>
+        <div class="batch-bar-actions">
+          <button class="btn-edit" id="btnBatchApprove" onclick="batchApprove()" disabled>
+            ✓ 批量批准
+          </button>
+          <button class="btn-danger" id="btnBatchReject" onclick="batchReject()" disabled>
+            ✕ 批量拒绝
+          </button>
+        </div>
+      </div>
+
+      <div id="pendingList" class="content-list"></div>
+    </div>
+
+    <!-- 智能体 -->
+    <div id="tab-agents" class="tab-content">
+      <h2>AI 智能体管理</h2>
+
+      <!-- 概览卡片 -->
+      <div class="agent-overview" id="agentOverview">
+        <div class="agent-stat-card" id="agentStatLLM">
+          <div class="agent-stat-icon">🔌</div>
+          <div class="agent-stat-info">
+            <div class="agent-stat-label">LLM 状态</div>
+            <div class="agent-stat-value" id="agentLLMStatus">加载中...</div>
+          </div>
+        </div>
+        <div class="agent-stat-card" id="agentStatLastRun">
+          <div class="agent-stat-icon">📊</div>
+          <div class="agent-stat-info">
+            <div class="agent-stat-label">最近执行</div>
+            <div class="agent-stat-value" id="agentLastRun">加载中...</div>
+          </div>
+        </div>
+        <div class="agent-stat-card" id="agentStatPending">
+          <div class="agent-stat-icon">📋</div>
+          <div class="agent-stat-info">
+            <div class="agent-stat-label">待审核</div>
+            <div class="agent-stat-value" id="agentPendingCount">-</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LLM 配置 -->
+      <div class="agent-section">
+        <div class="agent-section-header">
+          <h3>LLM API 配置</h3>
+          <span class="agent-section-tag" id="llmConfigBadge">未配置</span>
+        </div>
+        <p class="agent-desc">配置 DeepSeek / OpenAI 兼容的 API，用于智能体内容处理。配置保存后仅存储在服务器本地。</p>
+        <form id="llmConfigForm" class="agent-form">
+          <div class="form-row">
+            <div class="agent-field">
+              <label>API 地址</label>
+              <input type="text" id="llmApiUrl" value="https://api.deepseek.com/v1" placeholder="https://api.deepseek.com/v1">
+              <span class="agent-field-hint">兼容 OpenAI 格式的 API 地址</span>
+            </div>
+            <div class="agent-field">
+              <label>模型名称</label>
+              <input type="text" id="llmModel" value="deepseek-chat" placeholder="deepseek-chat">
+              <span class="agent-field-hint">如 deepseek-chat, gpt-4o-mini 等</span>
+            </div>
+          </div>
+          <div class="agent-field">
+            <label>API Key</label>
+            <input type="password" id="llmApiKey" placeholder="sk-...">
+            <span class="agent-field-hint" id="llmKeyHint">在 DeepSeek/OpenAI 控制台获取</span>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" id="btnTestLLM" onclick="testLLM()">
+              <span class="btn-text">🔌 测试连接</span>
+            </button>
+            <button type="submit" class="btn-primary" id="btnSaveLLM">
+              <span class="btn-text">💾 保存配置</span>
+            </button>
+          </div>
+          <div id="llmConfigStatus" class="config-status"></div>
+        </form>
+      </div>
+
+      <!-- 新闻采集 Agent -->
+      <div class="agent-section">
+        <div class="agent-section-header">
+          <h3>新闻采集 Agent</h3>
+          <span class="agent-section-tag agent-tag-auto">自动运行</span>
+        </div>
+        <p class="agent-desc">自动从 14 个心理学相关 RSS 源采集新闻，经 LLM 翻译、摘要和分类后进入待审核队列。</p>
+
+        <div class="agent-rss-sources">
+          <div class="agent-rss-title">RSS 数据源（14 个）：</div>
+          <div class="agent-rss-list">
+            <span class="agent-rss-item">ScienceDaily · 心理学研究</span>
+            <span class="agent-rss-item">ScienceDaily · 心理健康</span>
+            <span class="agent-rss-item">ScienceDaily · 神经科学</span>
+            <span class="agent-rss-item">ScienceDaily · 社会心理学</span>
+            <span class="agent-rss-item">ScienceDaily · 教育心理学</span>
+            <span class="agent-rss-item">ScienceDaily · 儿童发展</span>
+            <span class="agent-rss-item">ScienceDaily · 行为科学</span>
+            <span class="agent-rss-item">ScienceDaily · 自闭症</span>
+            <span class="agent-rss-item">ScienceDaily · 精神分裂症</span>
+            <span class="agent-rss-item">ScienceDaily · 医学心理健康</span>
+            <span class="agent-rss-item">Nature · 心理学</span>
+            <span class="agent-rss-item">Nature · 神经科学</span>
+            <span class="agent-rss-item">PsyPost · 心理学新闻</span>
+            <span class="agent-rss-item">Mind Hacks · 神经心理学</span>
+          </div>
+        </div>
+
+        <div class="agent-actions">
+          <button class="btn-primary" id="btnTriggerNews" onclick="triggerNewsAgent()">
+            <span class="btn-text">🚀 立即采集</span>
+          </button>
+          <button class="btn-secondary" id="btnTriggerLiterature" onclick="triggerLiteratureAgent()">
+            <span class="btn-text">📚 采集文献</span>
+          </button>
+          <div id="agentRunStatus" class="agent-status-wrapper"></div>
+        </div>
+      </div>
+
+      <!-- 出题智能体 -->
+      <div class="agent-section">
+        <div class="agent-section-header">
+          <h3>出题智能体</h3>
+          <span class="agent-section-tag agent-tag-manual">手动触发</span>
+        </div>
+        <p class="agent-desc">基于课程教材或外部培训资料，由 LLM 生成备考题目，<b>每条均强制标注可溯源来源</b>，进入待审核队列由你核验后入库。</p>
+        <form id="questionAgentForm" class="agent-form" onsubmit="return false">
+          <div class="agent-field">
+            <label>出题数量</label>
+            <input type="number" id="qCount" value="8" min="1" max="20">
+            <span class="agent-field-hint">建议 5-10 题</span>
+          </div>
+          <div class="agent-field">
+            <label>出题模式</label>
+            <select id="qMode" onchange="onQuestionModeChange()">
+              <option value="course">课程模式（基于已导入教材，最可信）</option>
+              <option value="external">外部模式（基于你提供的资料/URL）</option>
+            </select>
+          </div>
+          <div class="agent-field" id="qCourseField">
+            <label>选择课程</label>
+            <select id="qCourseSelect"><option value="">全部课程</option></select>
+            <span class="agent-field-hint">留空表示基于全部课程出题</span>
+          </div>
+          <div class="agent-field" id="qExternalField" style="display:none">
+            <label>资料文本（可选）</label>
+            <textarea id="qText" rows="3" placeholder="粘贴培训教程/讲义文本"></textarea>
+          </div>
+          <div class="agent-field" id="qUrlField" style="display:none">
+            <label>资料 URL（可选）</label>
+            <input type="text" id="qUrl" placeholder="https://...">
+            <span class="agent-field-hint">系统将抓取该页面正文作为出题依据，source 记为该 URL</span>
+          </div>
+          <div class="agent-actions">
+            <button type="button" class="btn-primary" id="btnTriggerQuestion" onclick="triggerQuestionAgent()">
+              <span class="btn-text">🤖 生成题目</span>
+            </button>
+            <div id="questionRunStatus" class="agent-status-wrapper"></div>
+          </div>
+        </form>
+      </div>
+
+      <!-- 定时任务 -->
+      <div class="agent-section">
+        <div class="agent-section-header">
+          <h3>定时任务</h3>
+          <span class="agent-section-tag agent-tag-auto">node-cron</span>
+        </div>
+        <p class="agent-desc">在后端进程内按周期自动执行智能体任务。默认：新闻每天 08:00、文献每周一 09:00。可开关、改周期或立即执行。</p>
+        <div id="schedulesList" class="content-list"><div class="agent-loading">加载中...</div></div>
+      </div>
+
+      <!-- 执行历史 -->
+      <div class="agent-section">
+        <div class="agent-section-header">
+          <h3>执行历史</h3>
+          <button class="btn-secondary btn-sm" id="btnRefreshRuns" onclick="loadAgentRuns()">
+            <span class="btn-text">🔄 刷新</span>
+          </button>
+        </div>
+        <div id="agentRunsList" class="content-list">
+          <div class="agent-loading">加载中...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 用户管理 -->
+    <div id="tab-users" class="tab-content">
+      <h2>用户管理</h2>
+      <div id="userList" class="content-list"></div>
+    </div>
+
+    <!-- 系统设置 -->
+    <div id="tab-settings" class="tab-content">
+      <h2>系统设置</h2>
+      <div class="settings-section">
+        <h3>修改密码</h3>
+        <form id="changePasswordForm">
+          <input type="password" id="oldPassword" placeholder="当前密码" required>
+          <input type="password" id="newPassword" placeholder="新密码（至少6位）" required>
+          <input type="password" id="confirmPassword" placeholder="确认新密码" required>
+          <button type="submit" class="btn-primary">修改密码</button>
+        </form>
+      </div>
+      <div class="settings-section">
+        <h3>数据导出</h3>
+        <p>导出全部数据为 JSON 文件，可用于备份。</p>
+        <button class="btn-primary" onclick="exportAllData()">⬇️ 导出全部数据</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- 模态框 -->
+<div id="modal" class="modal" style="display:none">
+  <div class="modal-overlay" onclick="closeModal()"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="modalTitle">编辑</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- Toast 提示 -->
+<div id="toast" class="toast" style="display:none"></div>
+
+<script src="admin.js"></script>
+</body>
+</html>

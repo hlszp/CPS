@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CPS三级心理咨询师备考平台 | 理论与实务课程讲解·知识检索·模拟测试</title>
+<meta name="description" content="中国心理学会心理咨询师水平评价三级考试备考平台，涵盖基础理论6门课程与实务8门课程的系统讲解、知识检索与全真模拟测试。">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav id="navbar" class="navbar">
+  <div class="nav-container">
+    <a href="#/" class="nav-logo">
+      <span class="logo-icon">CPS</span>
+      <span class="logo-text">三级备考平台</span>
+    </a>
+    <div class="nav-links">
+      <a href="#/" data-route="home">首页</a>
+      <a href="#/courses" data-route="courses">课程中心</a>
+      <a href="#/knowledge" data-route="knowledge">知识探索</a>
+      <a href="#/practice" data-route="practice">练习测验</a>
+      <a href="#/quiz" data-route="quiz">模拟测试</a>
+      <a href="#/daily" data-route="daily">每日一练</a>
+      <a href="#/news" data-route="news">资讯概览</a>
+    </div>
+    <div class="nav-right">
+      <div class="countdown-timer" id="countdownTimer" title="距离下一次CPS三级考试">
+        <span class="cd-icon">⏰</span>
+        <div class="cd-info">
+          <span class="cd-label" id="cdLabel">距考试</span>
+          <span class="cd-days" id="cdDays">--</span>
+        </div>
+      </div>
+    </div>
+    <button class="nav-toggle" id="navToggle" aria-label="菜单">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<main id="app" class="app-container"></main>
+
+<footer class="footer">
+  <div class="footer-container">
+    <div class="footer-section">
+      <h4>CPS三级备考平台</h4>
+      <p>基于《心理咨询基础培训教材》打造的专业备考资源门户</p>
+    </div>
+    <div class="footer-section">
+      <h4>快速链接</h4>
+      <a href="#/courses">课程中心</a>
+      <a href="#/knowledge">知识探索</a>
+      <a href="#/practice">练习测验</a>
+      <a href="#/quiz">模拟测试</a>
+      <a href="#/daily">每日一练</a>
+      <a href="#/news">资讯概览</a>
+    </div>
+    <div class="footer-section">
+      <h4>关于</h4>
+      <p>本平台内容基于中国心理学会心理咨询师水平评价规范及指定教材编写，仅供学习参考。</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2026 ZhangYi. All Rights Reserved. CPS三级心理咨询师水平评价考试备考平台</p>
+    <p class="footer-icp">本网站内容仅供参考学习，转载请注明出处 | Copyright &copy; 2026 by ZhangYi</p>
+  </div>
+</footer>
+
+<script src="js/data/theory.js"></script>
+<script src="js/data/practice.js"></script>
+<script src="js/data/questions.js"></script>
+<script src="js/data/practice-cards.js"></script>
+<script src="js/data/knowledge-graph.js"></script>
+<script src="https://unpkg.com/@antv/g6@4.8.24/dist/g6.min.js"></script>
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/modules/search.js"></script>
+<script src="js/modules/ai-chat.js"></script>
+<script src="js/modules/quiz.js"></script>
+<script src="js/modules/courses.js"></script>
+<script src="js/modules/practice.js"></script>
+<script src="js/modules/knowledge.js"></script>
+<script src="js/modules/news.js"></script>
+<script src="js/modules/daily.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
