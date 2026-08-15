@@ -361,6 +361,21 @@
         </form>
       </div>
 
+      <!-- 知识图谱更新 Agent -->
+      <div class="agent-section">
+        <div class="agent-section-header">
+          <h3>知识图谱更新 Agent</h3>
+          <span class="agent-section-tag agent-tag-manual">手动触发</span>
+        </div>
+        <p class="agent-desc">聚合最新新闻、题库、课程为图谱「动态内容层」（带实时计数），并用 LLM 补充课程骨架知识点，写回知识图谱。前端「知识探索」页即反映最新结果。</p>
+        <div class="agent-actions">
+          <button class="btn-primary" id="btnTriggerKnowledge" onclick="triggerKnowledgeAgent()">
+            <span class="btn-text">🕸️ 更新知识图谱</span>
+          </button>
+          <div id="knowledgeRunStatus" class="agent-status-wrapper"></div>
+        </div>
+      </div>
+
       <!-- 定时任务 -->
       <div class="agent-section">
         <div class="agent-section-header">

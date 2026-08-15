@@ -1447,6 +1447,99 @@ async function triggerLiteratureAgent() {
   } catch (e) { showToast(e.message, 'error'); }
 }
 
+/** 触发知识图谱更新 —— 带轮询状态 */
+let _knowledgePollTimer = null;
+async function triggerKnowledgeAgent() {
+  const statusEl = document.getElementById('knowledgeRunStatus');
+  if (!statusEl) return;
+  setButtonLoading('btnTriggerKnowledge', true);
+
+  statusEl.innerHTML = `
+    <div class="agent-progress">
+      <div class="agent-progress-row">知识图谱更新中，请稍候...</div>
+      <div class="agent-progress-detail">聚合新闻/题库/课程，并用 LLM 补充骨架</div>
+    </div>
+  `;
+
+  try {
+    await api('/agent/trigger/knowledge', { method: 'POST' });
+    showToast('知识图谱更新已启动', 'success');
+
+    let elapsed = 0;
+    const pollInterval = 3000;
+
+    _knowledgePollTimer = setInterval(async () => {
+      elapsed += pollInterval;
+      try {
+        const data = await api('/agent/status');
+        const run = data.run;
+
+        if (!run) {
+          statusEl.querySelector('.agent-progress-detail').textContent =
+            '正在初始化任务... (' + Math.round(elapsed/1000) + 's)';
+          return;
+        }
+
+        // 仅关注知识图谱类型的执行记录
+        if (run.agent_type !== 'knowledge') {
+          statusEl.querySelector('.agent-progress-detail').textContent =
+            '等待任务写入... (' + Math.round(elapsed/1000) + 's)';
+          return;
+        }
+
+        if (run.status === 'running') {
+          statusEl.querySelector('.agent-progress-detail').textContent =
+            '已生成 ' + (run.items_saved||0) + ' 个动态节点... (' + Math.round(elapsed/1000) + 's)';
+        } else {
+          clearInterval(_knowledgePollTimer);
+          _knowledgePollTimer = null;
+          setButtonLoading('btnTriggerKnowledge', false);
+
+          if (run.status === 'success') {
+            statusEl.innerHTML = `
+              <div class="agent-progress" style="background:#f6ffed;border-color:#b7eb8f;">
+                <div class="agent-progress-row" style="color:#389e0d;">✓ 知识图谱已更新</div>
+                <div class="agent-progress-detail">新增/刷新 ${run.items_saved||0} 个动态节点，前端「知识探索」即生效</div>
+              </div>
+            `;
+            showToast('知识图谱更新完成，新增 ' + (run.items_saved||0) + ' 个节点', 'success');
+          } else {
+            statusEl.innerHTML = `
+              <div class="agent-progress" style="background:#fff2f0;border-color:#ffccc7;">
+                <div class="agent-progress-row" style="color:#cf1322;">✗ 更新失败</div>
+                <div class="agent-progress-detail">${(run.error||'未知错误').slice(0,100)}</div>
+              </div>
+            `;
+            showToast('知识图谱更新失败', 'error');
+          }
+          loadAgentRuns();
+        }
+      } catch (e) { /* 轮询出错，继续尝试 */ }
+
+      if (elapsed >= 300000) {
+        clearInterval(_knowledgePollTimer);
+        _knowledgePollTimer = null;
+        setButtonLoading('btnTriggerKnowledge', false);
+        statusEl.innerHTML = `
+          <div class="agent-progress" style="background:#fffbe6;border-color:#ffe58f;">
+            <div class="agent-progress-row" style="color:#d48806;">更新超时</div>
+            <div class="agent-progress-detail">已超过 5 分钟，请稍后刷新查看结果</div>
+          </div>
+        `;
+      }
+    }, pollInterval);
+  } catch (e) {
+    setButtonLoading('btnTriggerKnowledge', false);
+    statusEl.innerHTML = `
+      <div class="agent-progress" style="background:#fff2f0;border-color:#ffccc7;">
+        <div class="agent-progress-row" style="color:#cf1322;">✗ 触发失败</div>
+        <div class="agent-progress-detail">${(e.message||'未知错误').slice(0,100)}</div>
+      </div>
+    `;
+    showToast('触发失败：' + (e.message||''), 'error');
+  }
+}
+
 /** 加载定时任务列表 */
 async function loadSchedules() {
   const list = document.getElementById('schedulesList');

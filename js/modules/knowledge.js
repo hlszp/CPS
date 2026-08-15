@@ -96,8 +96,25 @@ var KnowledgeModule = (function() {
   }
 
   /* ===== 知识图谱 (G6) ===== */
-  function renderGraph(body) {
-    graphData = (typeof KNOWLEDGE_GRAPH !== 'undefined') ? KNOWLEDGE_GRAPH : { nodes: [], edges: [] };
+  /**
+   * 从后端 /api/knowledge 加载图谱（知识图谱 Agent 更新后此处即反映最新）；
+   * 接口不可用时回退到静态常量 KNOWLEDGE_GRAPH
+   */
+  async function loadGraphData() {
+    try {
+      var r = await fetch('/api/knowledge');
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      var res = await r.json();
+      if (res && res.graph && Array.isArray(res.graph.nodes) && res.graph.nodes.length > 0) return res.graph;
+      throw new Error('empty');
+    } catch (e) {
+      console.warn('[Knowledge] 加载接口失败，回退静态数据：', e.message);
+      return (typeof KNOWLEDGE_GRAPH !== 'undefined') ? KNOWLEDGE_GRAPH : { nodes: [], edges: [] };
+    }
+  }
+
+  async function renderGraph(body) {
+    graphData = await loadGraphData();
 
     if (typeof G6 === 'undefined') {
       body.innerHTML = '<div class="kg-error" style="padding:60px;text-align:center;color:#888">' +
@@ -132,7 +149,8 @@ var KnowledgeModule = (function() {
             '<span class="lg-item"><span class="lg-dot lg-course"></span>课程</span>' +
             '<span class="lg-item"><span class="lg-dot lg-concept"></span>概念</span>' +
             '<span class="lg-item"><span class="lg-dot lg-detail"></span>知识点</span>' +
-            '<span class="lg-item"><span class="lg-line"></span>关联</span>' +
+            '<span class="lg-item"><span class="lg-dot" style="background:#0891B2"></span>动态内容</span>' +
+            '<span class="lg-item"><span class="lg-dot lg-line"></span>关联</span>' +
           '</div>' +
         '</div>' +
         '<div class="kg-main">' +
@@ -376,8 +394,10 @@ var KnowledgeModule = (function() {
     var t = themes[theme];
 
     var nodes = graphData.nodes.map(function(n) {
-      var size = levelSizes[n.level] || 14;
-      var color = levelColors[n.level] || '#999';
+      var isContent = n._layer === 'content';
+      var isLLM = n._layer === 'llm';
+      var size = n.size || levelSizes[n.level] || 14;
+      var color = isContent ? '#0891B2' : (isLLM ? '#7C3AED' : (levelColors[n.level] || '#999'));
       return {
         id: n.id,
         label: n.label,
@@ -387,6 +407,7 @@ var KnowledgeModule = (function() {
         nodeType: n.type,
         desc: n.desc,
         parent: n.parent,
+        layerType: n._layer,
         size: size,
         style: {
           fill: color,

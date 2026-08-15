@@ -452,7 +452,7 @@ async function run(trigger = 'manual', mode = 'news') {
 
     console.log(`[NewsAgent] 完成: 发现 ${itemsFound}, 保存 ${itemsSaved}, 错误 ${fetchErrors.length + processErrors.length}`);
 
-    return { itemsFound, itemsSaved, errors };
+    return { itemsFound, itemsSaved, errors: fetchErrors.concat(processErrors) };
 
   } catch (e) {
     // 执行失败

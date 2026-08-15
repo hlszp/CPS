@@ -14,6 +14,7 @@ const { requireAdmin } = require('../middleware/auth');
 const { getSafeConfig, saveConfig, getConfig, chat } = require('../agents/llm');
 const newsAgent = require('../agents/news-agent');
 const questionAgent = require('../agents/question-agent');
+const knowledgeAgent = require('../agents/knowledge-agent');
 
 const router = express.Router();
 
@@ -79,6 +80,21 @@ router.post('/trigger/questions', requireAdmin, async (req, res) => {
       scopeUrl: url || ''
     }, 'manual').catch(e => {
       console.error('[Agent Route] 出题失败:', e.message);
+    });
+  } catch (e) {
+    res.status(500).json({ error: '触发失败: ' + e.message });
+  }
+});
+
+/**
+ * POST /api/agent/trigger/knowledge - 手动触发知识图谱更新
+ * 聚合新闻/题库/课程为内容层，并用 LLM 补充骨架知识点，写回 knowledge_graph 表
+ */
+router.post('/trigger/knowledge', requireAdmin, async (req, res) => {
+  try {
+    res.json({ message: '知识图谱更新已启动', status: 'running' });
+    knowledgeAgent.run('manual').catch(e => {
+      console.error('[Agent Route] 知识图谱更新失败:', e.message);
     });
   } catch (e) {
     res.status(500).json({ error: '触发失败: ' + e.message });
